@@ -11,6 +11,7 @@ import Graphics.Rendering.Cairo
 import Graphics.UI.Gtk
 -- import Graphics.UI.Gtk.Gdk.EventM
 import Graphics.Rendering.Cairo.SVG
+import Hemokit.Start
 
 import Hemokit
 
@@ -32,7 +33,19 @@ main = do
   _ <- forkIO $ do
     putMVar emotivStateMvar undefined
     putStrLn "Waiting for EEG data..."
-    withDataFromLastEEG Consumer (void . swapMVar emotivStateMvar . fst)
+
+    -- Connect to any device
+    m'device <- getEmotivDeviceFromArgs =<< parseArgs "FFT on Emotiv data" emotivArgsParser
+    case m'device of
+      Left  _      -> print "No device"
+      Right device -> forever $ do m'st <- readEmotiv device
+                                   case m'st of
+                                    Nothing -> print "no data"
+                                    Just (x,_) -> void $ swapMVar emotivStateMvar x
+                                   
+
+    -- Old
+    -- withDataFromLastEEG Consumer (void . swapMVar emotivStateMvar . fst)
 
   run width height $ \window -> do
     _ <- svgRender svg
