@@ -46,7 +46,7 @@ main = do
 
     -- Paint screen green
     let format = surfaceGetPixelFormat screen
-    green <- mapRGB format 0 0xFF 0
+    green <- mapRGB format 0x00 0x33 0x33
     fillRect screen Nothing green
 
     state <-  readMVar emotivStateMvar
@@ -61,9 +61,8 @@ main = do
 
 
 drawSSensor screen format pos s qual = do
-    red <- mapRGB format 0xFF 0 0
-    let side = 10
-        x = pos * w
+    -- red <- mapRGB format 0xFF 0 0
+    let x = pos * w
         y = h
         w = surfaceGetWidth screen `div` 14
         step :: Double
@@ -76,9 +75,11 @@ drawGradientVect screen format x y w h = do
 
 drawLine screen format x y w h = do
     let screenH = surfaceGetHeight screen
+        screenW = surfaceGetWidth screen
         redL    = 256 - (fromIntegral $ 256 * y `div` screenH)
+        blueL   = (fromIntegral $ 256 * x `div` screenW)
         y'      = surfaceGetHeight screen - y
-    color <- mapRGB format redL 0 0
+    color <- mapRGB format redL 0 blueL
     fillRect screen (Just (Rect x y' w 1)) color
 
 sensorHPosition :: Sensor -> Int
